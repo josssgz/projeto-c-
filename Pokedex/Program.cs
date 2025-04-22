@@ -34,4 +34,34 @@ app.MapPost("/pokemons", async (AppDbContext db, Pokemon pokemon) =>
     return Results.Created($"pokemons/{pokemon.Id}", pokemon);
 });
 
+app.MapPut("/pokemons/{id}", async (int id, AppDbContext db, Pokemon updatedPokemon) => 
+{
+    var pokemonAtual = await db.pokemons.FindAsync(id);
+
+    if(pokemonAtual == null){
+        return Results.NotFound("Pokemon não encontrado!");
+    }
+
+    pokemonAtual.Nome = updatedPokemon.Nome;
+    pokemonAtual.Peso = updatedPokemon.Peso;
+
+    await db.SaveChangesAsync(); 
+    return Results.Ok(pokemonAtual);
+});
+
+app.MapDelete("/pokemons/{id}", async (int id, AppDbContext db) => 
+{
+    var pokemon = await db.pokemons.FindAsync(id);
+
+    if(pokemon == null)
+    {
+        return Results.NotFound("Pokemon não encontrado!");
+    }
+
+    db.pokemons.Remove(pokemon);
+    await db.SaveChangesAsync(); 
+
+    return Results.Ok("Pokemon deletado com sucesso!");
+});
+
 app.Run();
